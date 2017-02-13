@@ -5,14 +5,36 @@ defmodule Rpn do
 
   def loop(stack) do
     receive do
-      :not_gonna_happen ->
-        :nosir_i_dont_like_it
+      {from, ref, :peek} ->
+        send(from, {ref, stack})
+        loop(stack)
+
+      {:push, :+} ->
+        [ second | [ first | rest ] ] = stack
+        loop([(first + second) | rest])
+
+      {:push, :-} ->
+        [ second | [ first | rest ] ] = stack
+        loop([(first - second) | rest])
+
+      {:push, :x} ->
+        [ second | [ first | rest ] ] = stack
+        loop([(first * second) | rest])
+
+      {:push, val} ->
+        loop([val | stack])
     end
   end
 
   def peek(pid) do
+    ref = make_ref()
+    send(pid, {self(), ref, :peek})
+    receive do
+      {^ref, stack} -> stack
+    end
   end
 
   def push(pid, val) do
+    send(pid, {:push, val})
   end
 end
