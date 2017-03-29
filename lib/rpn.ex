@@ -1,40 +1,47 @@
 defmodule Rpn do
-  def start do
-    {:ok, spawn(__MODULE__, :loop, [[]])}
-  end
+  use GenServer
+  alias Rpn.TapePrinter
 
-  def loop(stack) do
-    receive do
-      {from, ref, :peek} ->
-        send(from, {ref, stack})
-        loop(stack)
+  ### Client API
 
-      {:push, :+} ->
-        [ second | [ first | rest ] ] = stack
-        loop([(first + second) | rest])
-
-      {:push, :-} ->
-        [ second | [ first | rest ] ] = stack
-        loop([(first - second) | rest])
-
-      {:push, :x} ->
-        [ second | [ first | rest ] ] = stack
-        loop([(first * second) | rest])
-
-      {:push, val} ->
-        loop([val | stack])
-    end
+  def start_link(options \\ []) do
+    GenServer.start_link(__MODULE__, [], options)
   end
 
   def peek(pid) do
-    ref = make_ref()
-    send(pid, {self(), ref, :peek})
-    receive do
-      {^ref, stack} -> stack
-    end
+    GenServer.call(pid, :peek)
   end
 
-  def push(pid, val) do
-    send(pid, {:push, val})
+  def push(pid, op) do
+    GenServer.cast(pid, {:push, op})
+  end
+
+  ### Server API
+
+  def init() do
+    {:ok, []}
+  end
+
+  def handle_call(:peek, _from, state) do
+    {:reply, state, state}
+  end
+
+  def handle_cast({:push, :+}, [ second | [ first | rest ] ]) do
+    val = first + second
+    TapePrinter.print(val)
+    {:noreply, [val | rest]}
+  end
+  def handle_cast({:push, :-}, [ second | [ first | rest ] ]) do
+    val = first - second
+    TapePrinter.print(val)
+    {:noreply, [val | rest]}
+  end
+  def handle_cast({:push, :x}, [ second | [ first | rest ] ]) do
+    val = first * second
+    TapePrinter.print(val)
+    {:noreply, [val | rest]}
+  end
+  def handle_cast({:push, val}, state) do
+    {:noreply, [val | state]}
   end
 end

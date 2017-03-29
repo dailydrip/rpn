@@ -2,12 +2,12 @@ defmodule RpnTest do
   use ExUnit.Case
 
   test "starts with an empty stack" do
-    {:ok, pid} = Rpn.start
+    {:ok, pid} = Rpn.start_link
     assert Rpn.peek(pid) == []
   end
 
   test "pushing onto the stack" do
-    {:ok, pid} = Rpn.start
+    {:ok, pid} = Rpn.start_link
     Rpn.push(pid, 5)
     assert Rpn.peek(pid) == [5]
     Rpn.push(pid, 1)
@@ -15,7 +15,7 @@ defmodule RpnTest do
   end
 
   test "adding" do
-    {:ok, pid} = Rpn.start
+    {:ok, pid} = Rpn.start_link
     Rpn.push(pid, 5)
     Rpn.push(pid, 1)
     Rpn.push(pid, :+)
@@ -23,7 +23,7 @@ defmodule RpnTest do
   end
 
   test "subtracting" do
-    {:ok, pid} = Rpn.start
+    {:ok, pid} = Rpn.start_link
     Rpn.push(pid, 5)
     Rpn.push(pid, 1)
     Rpn.push(pid, :-)
@@ -31,7 +31,7 @@ defmodule RpnTest do
   end
 
   test "multiplying" do
-    {:ok, pid} = Rpn.start
+    {:ok, pid} = Rpn.start_link
     Rpn.push(pid, 5)
     Rpn.push(pid, 2)
     Rpn.push(pid, :x)
@@ -39,7 +39,7 @@ defmodule RpnTest do
   end
 
   test "wikipedia example" do
-    {:ok, pid} = Rpn.start
+    {:ok, pid} = Rpn.start_link
     Rpn.push(pid, 5)
     Rpn.push(pid, 1)
     Rpn.push(pid, 2)
